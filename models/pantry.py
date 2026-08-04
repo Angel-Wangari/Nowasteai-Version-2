@@ -13,16 +13,16 @@ class Pantry:
         self.unit=unit
         self.expiry_date=expiry_date
     def add(self):
-            pass
+        pass
     def expired_items(self):
-            return self.expiry_date<date.today()
+        return self.expiry_date<date.today()
     def remove(self,name):
-            pass
+        pass
     def find(self,name):
-            if name:
-                return "Item in pantry"
+        if name:
+            return "Item in pantry"
     def __str__(self):
-            return self.name
+        return self.name
         
             
             
