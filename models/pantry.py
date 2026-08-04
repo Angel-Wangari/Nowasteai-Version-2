@@ -1,26 +1,21 @@
 from datetime import date
+from ingredients import Ingredient
 class Pantry:
-    def __init__(self,name,quantity,unit,expiry_date):
-        if not name:
-            raise ValueError("Cannot be empty")
-        if not isinstance(date,expiry_date):
-            raise TypeError("Not a date")
-        if quantity<0:
-            raise ValueError("Quantity cannot be negative")
-        
-        self.name=name
-        self.quantity=quantity
-        self.unit=unit
-        self.expiry_date=expiry_date
-    def add(self):
-        pass
+    def __init__(self,ingredient):
+        self.ingredients=[]
+    def add(self,item):
+        self.ingredient.append(item)
     def expired_items(self):
-        return self.expiry_date<date.today()
+        return 
     def remove(self,name):
-        pass
+        for ingredient in self.ingredients:
+            if name==ingredient:
+                self.ingredient.remove(name)
+                return
     def find(self,name):
-        if name:
-            return "Item in pantry"
+        for ingredient in self.ingredients:
+            if name==ingredient:
+                return f"{name} found in pantry"
     def __str__(self):
         return self.name
         
