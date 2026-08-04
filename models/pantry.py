@@ -13,16 +13,16 @@ class Pantry:
                 expired.append(ingredient)
         return expired
     def remove(self,name):
-        for i,ingredient in enumerate(self.ingredients):
-            if name==self.ingredients[i]:
-                self.ingredients.remove(name)
+        for ingredient in self.ingredients:
+            if name==ingredient.name:
+                self.ingredients.remove(ingredient)
                 return
     def find(self,name):
         for ingredient in self.ingredients:
-            if name==ingredient:
-                return name
+            if name==ingredient.name:
+                return ingredient
     def __str__(self):
-        return self.name
+        return "\n".join(str(ingredient) for ingredient in self.ingredients)
         
             
             
