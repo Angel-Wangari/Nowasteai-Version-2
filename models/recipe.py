@@ -8,7 +8,7 @@ class recipe:
         else:
             self.ingredients_needed[name]={"Quantity":quantity,"unit":unit}
         
-    def remove_ingredients(self,name):
+    def remove_ingredient(self,name):
         if name in self.ingredients_needed:
             del self.ingredients_needed[name]
         else:
@@ -16,4 +16,5 @@ class recipe:
     def _str_(self):
         for name, ingredient_info in self.ingredients_needed.items():
             output += f"{name} - {ingredient_info['Quantity']} {ingredient_info['unit']}\n"
-        
+        return output
+    
