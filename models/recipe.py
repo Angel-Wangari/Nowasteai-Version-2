@@ -14,6 +14,7 @@ class recipe:
         else:
             print(f"{name} not in {self.ingredients_needed}!")
     def _str_(self):
+        output=""
         for name, ingredient_info in self.ingredients_needed.items():
             output += f"{name} - {ingredient_info['Quantity']} {ingredient_info['unit']}\n"
         return output
