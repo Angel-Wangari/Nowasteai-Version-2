@@ -13,6 +13,7 @@ class ShoppingList:
             print(f"{name} not in Shopping List")
     def __str__(self):
         output=""
+        print("Shopping List:")
         for name,info in self.items.items():
             output+= f"{name}- {info['Quantity']} {info['unit']}\n"
         return output
