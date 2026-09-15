@@ -1,5 +1,5 @@
 from datetime import date
-from ingredients import Ingredient
+from .ingredients import Ingredient
 class Pantry:
     def __init__(self):
         self.ingredients=[]

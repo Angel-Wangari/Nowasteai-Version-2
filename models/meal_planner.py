@@ -1,5 +1,5 @@
-from pantry import Pantry
-from recipe import recipe
+from .pantry import Pantry
+from .recipe import recipe
 class Mealplanner:
     def __init__(self,pantry):
         self.pantry=pantry
