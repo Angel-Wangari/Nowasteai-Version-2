@@ -1,13 +1,18 @@
+import "./nav.css";
 function Nav(){
     return(
-    <nav>
-        <ul>
-            <li><a href="">No Waste ai</a></li>
-            <li><a href="">Pantry</a></li>
-            
 
-        </ul>
-    </nav>
+        <nav className="navbar">
+            <ul className="nav-list">
+                <li className="nav-brand">
+                    <a href="">No Waste AI</a>
+                </li>
+
+                <li className="nav-link">
+                    <a href="">Pantry</a>
+                </li>
+            </ul>
+        </nav>
 );
 }
 export default Nav
