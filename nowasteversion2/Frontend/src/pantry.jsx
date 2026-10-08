@@ -1,10 +1,12 @@
 import { useState } from "react"
+import "./pantry.css"
 function Pantry(){
     const[showForm,setShowForm]=useState(false)
     const[name,setName]=useState("")
     const[unit,setUnit]=useState("")
     const[quantity,setQuantity]=useState("")
     const[expiryDate,setExpiryDate]=useState("")
+    const[error,setError]=useState("")
     const handleSubmit= async (event)=>{event.preventDefault();
             const ingredient = {
             name: name,
@@ -18,31 +20,51 @@ function Pantry(){
                 "Content-Type":"application/json"
             },
             body:JSON.stringify(ingredient)
-        })
+        });
+        if(!response.ok){
+            setError("Failed to add Ingredient")
+            return;
+        }
     }
     
     return(
-        <>
-        <h1>Pantry</h1>
-        <button onClick={()=>setShowForm(true)}>Add ingredient</button>
-        {showForm &&(
-            <form onSubmit={handleSubmit}>
-                <label htmlFor="name">Name:</label>
-                <input type="text" id="name" name="name" value={name} onChange={(event)=>setName(event.target.value)} required/>
-                <label htmlFor="unit">Unit:</label>
-                <input type="text" id="unit" name="unit" value={unit} onChange={(event)=>setUnit(event.target.value)} required/>
-                <label htmlFor="quantity">Quantity:</label>
-                <input type="text" id="quantity" name="quantity" value={quantity} onChange={(event)=>setQuantity(event.target.value)} required/>
-                <label htmlFor="expiry_date">Expiry Date:</label>
-                <input type="text" id="expiry_date" name="expiry_date" value={expiryDate} onChange={(event)=>setExpiryDate(event.target.value)} required/>
-                <button type="submit">Add Ingredient</button>
-            </form >
-        )
+        <main className="pantry">
+            <div className="pantry-header">
+                <div>
+                    <h2>Pantry</h2>
+                    <p>Add Ingredients you currently have</p>
+                </div>
+            
+            <button className="add-button" onClick={()=>setShowForm(true)}>Add ingredient</button>
+            </div>
+            {showForm &&(
+                <form className="ingredient-form" onSubmit={handleSubmit}>
+                    {error && <p className="form-error">{error}</p>}
+                    <label htmlFor="name">Name:</label>
+                    <input type="text" id="name" name="name" value={name} onChange={(event)=>setName(event.target.value)} required/>
+                    <div className="form-row">
+                        <div className="form-field">
+                        <label htmlFor="quantity">Quantity:</label>
+                        <input type="number" id="quantity" name="quantity" value={quantity} onChange={(event)=>setQuantity(event.target.value)} required/>
+                        </div>
+                        <div className="form-field">
+                            <label htmlFor="unit">Unit:</label>
+                            <input type="text" id="unit" name="unit" value={unit} onChange={(event)=>setUnit(event.target.value)} required/>
+                        </div>
+                    </div>
+                    <label htmlFor="expiry_date">Expiry Date:</label>
+                    <input type="date" id="expiry_date" name="expiry_date" value={expiryDate} onChange={(event)=>setExpiryDate(event.target.value)} required/>
+                    <div className="form-actions">
+                        <button type="button" className="cancel-button" onClick={()=>setShowForm(false)}>Cancel</button>
+                        <button type="submit">Add Ingredient</button>
+                    </div>
+                </form >
+            )
 
-        }
+            }
 
 
-        </>
+        </main>
     )
 
 }
