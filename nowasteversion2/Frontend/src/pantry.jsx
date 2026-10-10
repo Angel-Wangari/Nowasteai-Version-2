@@ -1,7 +1,8 @@
-import { useState } from "react"
+import { useEffect,useState } from "react"
 import "./pantry.css"
 function Pantry(){
     const[showForm,setShowForm]=useState(false)
+    const[ingredients,setIngredients]=useState([])
     const[name,setName]=useState("")
     const[unit,setUnit]=useState("")
     const[quantity,setQuantity]=useState("")
@@ -26,6 +27,14 @@ function Pantry(){
             return;
         }
     }
+    useEffect(()=>{
+        const fetchIngredients=async () =>{
+            const response= await fetch("http://127.0.0.1:8000/Ingredient");
+            const data=await response.json();
+            setIngredients(data)
+        };
+        fetchIngredients();
+    },[]);
     
     return(
         <main className="pantry">
@@ -62,6 +71,16 @@ function Pantry(){
             )
 
             }
+            <div className="ingredient-list">
+                {ingredients.map((ingredient)=>(
+                    <div className="ingredient-card" key={ingredient.id}>
+                        <h3>{ingredient.name}</h3>
+                        <p>{ingredient.quantity} {ingredient.unit}</p>
+                        <p>Expires: {ingredient.expiry_date}</p>
+
+                    </div>
+                ))}
+            </div>
 
 
         </main>
