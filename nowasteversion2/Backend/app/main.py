@@ -1,4 +1,4 @@
-from fastapi import FastAPI,Depends
+from fastapi import FastAPI,Depends,HTTPException
 from app.schema import Ingredient
 from app.models.pantry import Ingredient as IngredientModel
 from app.database import get_db,ENGINE,Base
@@ -38,3 +38,15 @@ async def getIngredients(db=Depends(get_db)):
     statement=select(IngredientModel)
     ingredients=db.scalars(statement).all()
     return ingredients
+@app.delete("/Ingredient/{ingredient_id}")
+def deleteIngredient(ingredient_id:int,db=Depends(get_db)):
+    ingredient=db.get(IngredientModel,ingredient_id)
+    if ingredient is None:
+        raise HTTPException(
+            status_code=404,
+            detail="Ingredient not Found"
+        )
+    db.delete(ingredient)
+    db.commit()
+    return{"message":"Ingredient deleted successfully"}
+        
