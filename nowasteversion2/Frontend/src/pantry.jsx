@@ -8,25 +8,75 @@ function Pantry(){
     const[quantity,setQuantity]=useState("")
     const[expiryDate,setExpiryDate]=useState("")
     const[error,setError]=useState("")
-    const handleSubmit= async (event)=>{event.preventDefault();
+    const[success,setSuccess]=useState("")
+    const[isSubmitting,setIsSubmitting]=useState(false)
+    const handleSubmit= async (event)=>{
+            event.preventDefault();
+            
+            setError("");
+            setSuccess("");
+            setIsSubmitting(true);
             const ingredient = {
             name: name,
             unit: unit,
             quantity: quantity,
             expiry_date: expiryDate
-            };
-        const response= await fetch("http://127.0.0.1:8000/Ingredient",{
-            method:"POST",
-            headers:{
-                "Content-Type":"application/json"
-            },
-            body:JSON.stringify(ingredient)
-        });
-        if(!response.ok){
-            setError("Failed to add Ingredient")
-            return;
-        }
+        };
+        try{
+            const response= await fetch("http://127.0.0.1:8000/Ingredient",{
+                method:"POST",
+                headers:{
+                    "Content-Type":"application/json"
+                },
+                body:JSON.stringify(ingredient)
+            });
+            if(!response.ok){
+                setError("Failed to add Ingredient")
+                return;
+            }
+            const savedIngredient=await response.json();
+            setIngredients((currentIngredients)=>[
+                ...currentIngredients,
+                savedIngredient
+            ]);
+            setName("");
+            setUnit("");
+            setQuantity("");
+            setExpiryDate("");
+            setShowForm(false)
+            setSuccess("Ingredient added Successfully")
+    }catch(error){
+        setError("Could not connect to the server.Please try again")
+    }finally{
+        setIsSubmitting(false)
     }
+
+
+    };
+    const handleDelete=async(ingredientId)=>{
+        setError("")
+        setSuccess("")
+        try{
+            const response=await fetch (`http://127.0.0.1:8000/Ingredient/${ingredientId}`,
+                {method:"DELETE"}
+            );
+            if(!response.ok){
+                setError("Failed to delete Ingredient")
+                return;
+            }
+            setIngredients((currentIngredients)=>
+                currentIngredients.filter(
+                    (ingredient)=>ingredient.id!==ingredientId
+                )
+            );
+            setSuccess("Ingredient Deleted Successfully")
+
+            
+
+        }catch(error){
+            setError("Could not connect to server")
+        }
+    };
     useEffect(()=>{
         const fetchIngredients=async () =>{
             const response= await fetch("http://127.0.0.1:8000/Ingredient");
@@ -36,8 +86,20 @@ function Pantry(){
         fetchIngredients();
     },[]);
     
+    useEffect(() => {
+        if (!success) return;
+
+        const timer = setTimeout(() => {
+            setSuccess("");
+        }, 3000);
+
+        return () => clearTimeout(timer);
+    }, [success]);
+
+    
     return(
         <main className="pantry">
+            {success && <p>{success}</p>}
             <div className="pantry-header">
                 <div>
                     <h2>Pantry</h2>
@@ -65,7 +127,9 @@ function Pantry(){
                     <input type="date" id="expiry_date" name="expiry_date" value={expiryDate} onChange={(event)=>setExpiryDate(event.target.value)} required/>
                     <div className="form-actions">
                         <button type="button" className="cancel-button" onClick={()=>setShowForm(false)}>Cancel</button>
-                        <button type="submit">Add Ingredient</button>
+                        <button type="submit" disabled={isSubmitting}>
+                            {isSubmitting ? "Adding..." : "Add Ingredient"}
+                        </button>
                     </div>
                 </form >
             )
@@ -77,7 +141,26 @@ function Pantry(){
                         <h3>{ingredient.name}</h3>
                         <p>{ingredient.quantity} {ingredient.unit}</p>
                         <p>Expires: {ingredient.expiry_date}</p>
+                        {(()=>{
+                            
+                            const daysLeft = Math.ceil(
+                                (
+                                    new Date(`${ingredient.expiry_date}T00:00:00`).getTime()
+                                    - new Date().setHours(0, 0, 0, 0)
+                                ) / (1000 * 60 * 60 * 24)
+                            );
 
+                            if (daysLeft < 0){
+                                return <p className="expiry-expired">Expired</p>;
+                            }
+                            if (daysLeft<=3){
+                                return <p className="expiry-soon">Use soon</p>;
+                            }
+                            return <p className="expiry-ok">Still fresh</p>
+                        })()}
+                        <button className="delete-button" type="button" onClick={()=>handleDelete(ingredient.id)}>
+                            Delete
+                        </button>
                     </div>
                 ))}
             </div>
