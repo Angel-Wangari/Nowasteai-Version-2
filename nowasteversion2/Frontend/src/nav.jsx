@@ -12,6 +12,10 @@ function Nav(){
                 <li className="nav-link">
                     <Link to="/pantry">Pantry</Link>
                 </li>
+                <li className="nav-link">
+                    <Link to="/recipes">Recipes</Link>
+
+                </li>
             </ul>
         </nav>
 );
