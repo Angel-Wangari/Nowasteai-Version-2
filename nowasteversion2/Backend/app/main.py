@@ -52,18 +52,16 @@ def deleteIngredient(ingredient_id:int,db=Depends(get_db)):
     return{"message":"Ingredient deleted successfully"}
 @app.post("/Equipment")
 def save_equipment(equipment:KitchenEquipmentCreate,db=Depends(get_db)):
-    savedEquiment=KitchenEquipment(
-        has_cooker=equipment.has_cooker,
-        has_frying_pan=equipment.has_frying_pan,
-        has_oven=equipment.has_oven,
-        has_microwave=equipment.has_microwave,
-        has_air_fryer=equipment.has_air_fryer,
-        has_blender=equipment.has_blender
-        
-        
-    )
-        
-    db.add(savedEquiment)
+    savedEquiment=db.query(KitchenEquipment).first()
+    if savedEquiment is None:
+        savedEquiment=KitchenEquipment()
+        db.add(savedEquiment)
+    savedEquiment.has_cooker=equipment.has_cooker
+    savedEquiment.has_frying_pan=equipment.has_frying_pan
+    savedEquiment.has_oven=equipment.has_oven
+    savedEquiment.has_microwave=equipment.has_microwave,
+    savedEquiment.has_air_fryer=equipment.has_air_fryer
+    savedEquiment.has_blender=equipment.has_blender
     db.commit()
     db.refresh(savedEquiment)
     return savedEquiment
