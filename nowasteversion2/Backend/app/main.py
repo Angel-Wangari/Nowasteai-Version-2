@@ -1,6 +1,7 @@
 from fastapi import FastAPI,Depends,HTTPException
-from app.schema import Ingredient
-from app.models.pantry import Ingredient as IngredientModel
+from app.schema import Ingredient,KitchenEquipmentCreate
+from app.models.pantry import Ingredient as IngredientModel 
+from app.models.equipment import KitchenEquipment
 from app.database import get_db,ENGINE,Base
 from sqlalchemy import select
 from fastapi.middleware.cors import CORSMiddleware
@@ -49,4 +50,20 @@ def deleteIngredient(ingredient_id:int,db=Depends(get_db)):
     db.delete(ingredient)
     db.commit()
     return{"message":"Ingredient deleted successfully"}
+@app.post("/Equipment")
+def save_equipment(equipment:KitchenEquipmentCreate,db=Depends(get_db)):
+    savedEquiment=KitchenEquipment(
+        has_cooker=equipment.has_cooker,
+        has_frying_pan=equipment.has_frying_pan,
+        has_oven=equipment.has_oven,
+        has_microwave=equipment.has_microwave,
+        has_air_fryer=equipment.has_air_fryer,
+        has_blender=equipment.has_blender
         
+        
+    )
+        
+    db.add(savedEquiment)
+    db.commit()
+    db.refresh(savedEquiment)
+    return savedEquiment
