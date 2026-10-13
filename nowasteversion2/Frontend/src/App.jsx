@@ -3,6 +3,7 @@ import Nav from "./nav.jsx";
 import Header from './DashboardHeader.jsx';
 import Pantry from "./pantry.jsx";
 import Recipes from "./recipe.jsx";
+import EquipmentSetup from "./EquipmentSetup.jsx";
 function App() {
   return(
     <BrowserRouter>
@@ -11,6 +12,7 @@ function App() {
       <Route path="/" element={<Header />}/>
       <Route path="/pantry" element={<Pantry />}/>
       <Route path="/recipes" element={<Recipes />}/>
+      <Route path="/equipment" element={<EquipmentSetup />}/>
 
     </Routes>
     

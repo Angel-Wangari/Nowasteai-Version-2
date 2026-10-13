@@ -16,6 +16,10 @@ function Nav(){
                     <Link to="/recipes">Recipes</Link>
 
                 </li>
+                <li className="nav-link">
+                    <Link to="/equipment">Equipment</Link>
+
+                </li>
             </ul>
         </nav>
 );
