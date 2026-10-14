@@ -59,7 +59,7 @@ def save_equipment(equipment:KitchenEquipmentCreate,db=Depends(get_db)):
     savedEquiment.has_cooker=equipment.has_cooker
     savedEquiment.has_frying_pan=equipment.has_frying_pan
     savedEquiment.has_oven=equipment.has_oven
-    savedEquiment.has_microwave=equipment.has_microwave,
+    savedEquiment.has_microwave=equipment.has_microwave
     savedEquiment.has_air_fryer=equipment.has_air_fryer
     savedEquiment.has_blender=equipment.has_blender
     db.commit()
