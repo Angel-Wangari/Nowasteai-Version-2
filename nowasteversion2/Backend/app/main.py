@@ -3,8 +3,10 @@ from app.schema import Ingredient,KitchenEquipmentCreate
 from app.models.pantry import Ingredient as IngredientModel 
 from app.models.equipment import KitchenEquipment
 from app.database import get_db,ENGINE,Base
+from app.recipe_service import generate_recipe
 from sqlalchemy import select
 from fastapi.middleware.cors import CORSMiddleware
+from datetime import date
 
 app=FastAPI()
 app.add_middleware(
@@ -65,3 +67,81 @@ def save_equipment(equipment:KitchenEquipmentCreate,db=Depends(get_db)):
     db.commit()
     db.refresh(savedEquiment)
     return savedEquiment
+@app.post("/GenerateRecipe")
+def create_recipe(db=Depends(get_db)):
+    statement=select(IngredientModel)
+    ingredients=db.scalars(statement).all()
+    saved_equipment=db.query(KitchenEquipment).first()
+    if not ingredients:
+        raise HTTPException(
+            status_code=400,
+            detail="Add ingredients to your pantry first."
+        )
+
+    today = date.today()
+
+    usable_ingredients = [
+        ingredient
+        for ingredient in ingredients
+        if ingredient.expiry_date >= today
+    ]
+
+    if not usable_ingredients:
+        raise HTTPException(
+            status_code=400,
+            detail="All ingredients in your pantry have expired."
+        )
+    if saved_equipment is None:
+        equipment_text="No Kitchen equipment has been added"
+    else:
+        equipment_items=[
+            name
+            for name,available in[
+                ("cooker",saved_equipment.has_cooker),
+                ("frying pan",saved_equipment.has_frying_pan),
+                ("oven",saved_equipment.has_oven),
+                ("microwave",saved_equipment.has_microwave),
+                ("blender",saved_equipment.has_blender),
+                ("air fryer",saved_equipment.has_air_fryer)
+            ] if available
+            
+        ]
+        equipment_text=", ".join(equipment_items)
+        if not equipment_text:
+            equipment_text = "No kitchen equipment is marked as available."
+    
+    ingredient_lines=[
+    f"{ingredient.name}: {ingredient.quantity} {ingredient.unit} ,"
+    f"expires {ingredient.expiry_date}"
+    for ingredient in usable_ingredients
+    ]
+    pantry_text="\n".join(ingredient_lines)
+    
+    
+    prompt = (
+        "Generate one simple, practical recipe using the available pantry "
+        "ingredients and kitchen equipment below.\n\n"
+        f"Pantry ingredients:\n{pantry_text}\n\n"
+        f"Available kitchen equipment: {equipment_text}\n\n"
+        "Rules:\n"
+        "- Use only the listed pantry ingredients, except water, salt and "
+        "cooking oil which may be assumed available.\n"
+        "- Never use expired ingredients.\n"
+        "- Do not exceed the quantities available in the pantry.\n"
+        "- Use only the listed kitchen equipment. Do not assume other "
+        "utensils or appliances are available.\n"
+        "- Prefer ingredients that are close to expiry but still usable.\n"
+        "- Use simple, everyday cooking language suitable for beginners.\n\n"
+        "Format the response exactly as follows:\n"
+        "Recipe name\n"
+        "Ingredients: list each ingredient with its quantity.\n"
+        "Instructions: provide 3 to 6 short, numbered cooking steps.\n\n"
+        "Keep the response concise. Include only the recipe name, "
+        "ingredients and cooking instructions. No introduction, tables, "
+        "explanations, tips, notes, substitutions or optional extras."
+    )
+
+
+    recipe=generate_recipe(prompt)
+    return{"recipe":recipe}
+
