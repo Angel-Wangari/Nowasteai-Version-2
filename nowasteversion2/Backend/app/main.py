@@ -1,5 +1,5 @@
 from fastapi import FastAPI,Depends,HTTPException
-from app.schema import Ingredient,KitchenEquipmentCreate,Recipe
+from app.schema import Ingredient,KitchenEquipmentCreate,Recipe,RecipeConfirmation
 from app.models.pantry import Ingredient as IngredientModel 
 from app.models.equipment import KitchenEquipment
 from app.database import get_db,ENGINE,Base
@@ -178,4 +178,29 @@ def create_recipe(db=Depends(get_db)):
             )
         
         return{"recipe":recipe.model_dump()}
+@app.post("/ConfirmRecipe")
+def confirm_recipe(confirmation:RecipeConfirmation,db=Depends(get_db)):
+    if not confirmation.made:
+        return{"message":"Recipe not made.Pantry unchanged"}
+    
+    try:
+        for recipe_ingredient in confirmation.recipe.ingredients:
+            pantry_ingredient=db.scalars(select(IngredientModel).where (IngredientModel.name.ilike(recipe_ingredient.name))).first()
+            if pantry_ingredient is None:
+                raise HTTPException (status_code=400,detail=f"{recipe_ingredient.name} is not in your pantry")
+            quantity_used= convert_quantity(
+                recipe_ingredient.quantity,recipe_ingredient.unit,pantry_ingredient.unit
+            )
+            
 
+            if quantity_used> pantry_ingredient.quantity:
+                raise HTTPException(status_code=400,detail=f" Not enough {pantry_ingredient.name} in your pantry.")
+            pantry_ingredient.quantity=round(pantry_ingredient.quantity-quantity_used,3)
+        
+        db.commit()
+    except Exception:
+        db.rollback()
+        raise
+        
+    
+    return{"message":"Recipe confirmed.Pantry quantities updated"}

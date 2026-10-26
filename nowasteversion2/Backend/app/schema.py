@@ -27,4 +27,9 @@ class Recipe(BaseModel):
     name:str
     ingredients:list[RecipeIngredient]
     instructions:list[str]
+class RecipeConfirmation(BaseModel):
+    made:bool
+    recipe:Recipe
     
+    
+       
