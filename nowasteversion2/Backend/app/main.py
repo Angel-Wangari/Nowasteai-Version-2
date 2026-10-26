@@ -1,9 +1,10 @@
 from fastapi import FastAPI,Depends,HTTPException
-from app.schema import Ingredient,KitchenEquipmentCreate
+from app.schema import Ingredient,KitchenEquipmentCreate,Recipe
 from app.models.pantry import Ingredient as IngredientModel 
 from app.models.equipment import KitchenEquipment
 from app.database import get_db,ENGINE,Base
 from app.recipe_service import generate_recipe
+from app.unit_conversion import convert_quantity
 from sqlalchemy import select
 from fastapi.middleware.cors import CORSMiddleware
 from datetime import date
@@ -142,6 +143,39 @@ def create_recipe(db=Depends(get_db)):
     )
 
 
-    recipe=generate_recipe(prompt)
-    return{"recipe":recipe}
+    recipe_data=generate_recipe(prompt)
+    recipe = Recipe.model_validate(recipe_data)
+
+    for recipe_ingredient in recipe.ingredients:
+        pantry_ingredient = next(
+            (
+                ingredient
+                for ingredient in usable_ingredients
+                if ingredient.name.lower() == recipe_ingredient.name.lower()
+            ),
+            None
+        )
+
+        if pantry_ingredient is None:
+            raise HTTPException(
+                status_code=400,
+                detail=f"{recipe_ingredient.name} is not in your pantry."
+            )
+
+        try:
+            required_quantity = convert_quantity(
+                recipe_ingredient.quantity,
+                recipe_ingredient.unit,
+                pantry_ingredient.unit
+            )
+        except ValueError as error:
+            raise HTTPException(status_code=400, detail=str(error))
+
+        if required_quantity > pantry_ingredient.quantity:
+            raise HTTPException(
+                status_code=400,
+                detail=f"Not enough {pantry_ingredient.name} in your pantry."
+            )
+        
+        return{"recipe":recipe.model_dump()}
 

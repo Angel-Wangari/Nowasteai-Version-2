@@ -6,8 +6,11 @@ CONVERSION_FACTORS={
     "pieces":("pieces",1)
 }
 def convert_quantity(quantity:float,from_unit:str,to_unit:str)->float:
-    if from_unit not in CONVERSION_FACTORS or to_unit not in CONVERSION_FACTORS:
-        raise ValueError("Unsupported unit")
+    if from_unit not in CONVERSION_FACTORS:
+        raise ValueError(f"Unsupported source unit: '{from_unit}'")
+
+    if to_unit not in CONVERSION_FACTORS:
+        raise ValueError(f"Unsupported target unit: '{to_unit}'")
     from_base,from_factor=CONVERSION_FACTORS[from_unit]
     to_base,to_factor=CONVERSION_FACTORS[to_unit]
     if from_base!= to_base:

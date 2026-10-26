@@ -19,4 +19,12 @@ class KitchenEquipmentCreate(BaseModel):
     has_microwave:bool=False
     has_blender:bool=False
     has_air_fryer:bool=False
+class RecipeIngredient(BaseModel):
+    name:str
+    quantity:float=Field(...,gt=0)
+    unit:str
+class Recipe(BaseModel):
+    name:str
+    ingredients:list[RecipeIngredient]
+    instructions:list[str]
     
