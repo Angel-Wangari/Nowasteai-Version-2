@@ -1,0 +1,4 @@
+nowasteversion2/Backend/.env
+nowasteversion2/Backend/venv/
+nowasteversion2/Backend/**/__pycache__/
+nowasteversion2/Backend/**/*.pyc

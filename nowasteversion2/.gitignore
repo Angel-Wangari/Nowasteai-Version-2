@@ -4,3 +4,8 @@ Backend/venv/
 # React
 Frontend/node_modules/
 Frontend/dist/
+
+
+__pycache__/
+*.py[cod]
+.env
