@@ -68,6 +68,21 @@ def save_equipment(equipment:KitchenEquipmentCreate,db=Depends(get_db)):
     db.commit()
     db.refresh(savedEquiment)
     return savedEquiment
+@app.get("/Equipment")
+def get_equipment(db=Depends(get_db)):
+    equipment = db.query(KitchenEquipment).first()
+
+    if equipment is None:
+        return {
+            "has_cooker": False,
+            "has_frying_pan": False,
+            "has_oven": False,
+            "has_microwave": False,
+            "has_air_fryer": False,
+            "has_blender": False
+        }
+
+    return equipment
 @app.post("/GenerateRecipe")
 def create_recipe(db=Depends(get_db)):
     statement=select(IngredientModel)
@@ -184,7 +199,13 @@ def confirm_recipe(confirmation:RecipeConfirmation,db=Depends(get_db)):
         return{"message":"Recipe not made.Pantry unchanged"}
     
     try:
+        assumed_ingredients = {"water", "salt", "cooking oil"}
+
         for recipe_ingredient in confirmation.recipe.ingredients:
+            if recipe_ingredient.name.strip().lower() in assumed_ingredients:
+                continue
+        
+        
             pantry_ingredient=db.scalars(select(IngredientModel).where (IngredientModel.name.ilike(recipe_ingredient.name))).first()
             if pantry_ingredient is None:
                 raise HTTPException (status_code=400,detail=f"{recipe_ingredient.name} is not in your pantry")
