@@ -16,10 +16,26 @@ function Pantry(){
             setError("");
             setSuccess("");
             setIsSubmitting(true);
-            const ingredient = {
-            name: name,
-            unit: unit,
-            quantity: quantity,
+           const normalisedUnit = {
+            
+            "l": "L",
+            "g": "g",
+            "kg": "kg",
+            "ml": "ml",
+            "piece": "pieces",
+            "pieces": "pieces"
+        }[unit.trim().toLowerCase()];
+
+        if (!normalisedUnit) {
+            setError("Unit must be L, g, kg, ml or pieces.");
+            setIsSubmitting(false);
+            return;
+        }
+
+        const ingredient = {
+            name: name.trim(),
+            unit: normalisedUnit,
+            quantity: Number(quantity),
             expiry_date: expiryDate
         };
         try{
@@ -30,10 +46,26 @@ function Pantry(){
                 },
                 body:JSON.stringify(ingredient)
             });
-            if(!response.ok){
-                setError("Failed to add Ingredient")
-                return;
+           if (!response.ok) {
+            const errorData = await response.json().catch(() => null);
+            const detail = errorData?.detail;
+
+            if (Array.isArray(detail)) {
+                setError(
+                    detail
+                        .map((item) => `${item.loc?.join(".")}: ${item.msg}`)
+                        .join("; ")
+                );
+            } else {
+                setError(
+                    typeof detail === "string"
+                        ? detail
+                        : `Failed to add ingredient (HTTP ${response.status})`
+                );
             }
+
+            return;
+        }
             const savedIngredient=await response.json();
             setIngredients((currentIngredients)=>[
                 ...currentIngredients,
